@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: soybean-disease-api
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: gunicorn app.main:app --bind 0.0.0.0:10000
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10
+    autoDeploy: true
