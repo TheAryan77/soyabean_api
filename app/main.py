@@ -9,25 +9,18 @@ import io
 import os
 import socket
 import sys
+import gdown
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+MODEL_URL = 'https://drive.google.com/file/d/1L51r2z5htdD9z3XSA2DUS987ImtofrnZ/view?usp=drive_link'
+MODEL_PATH = 'model_2_new_dataset.h5'
 
-# Model loading with error handling
-MODEL_PATH = 'VGG16/model_2_new_dataset.h5'
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        print("Downloading model from Google Drive...")
+        gdown.download(MODEL_URL, MODEL_PATH, quiet=False, fuzzy=True)
 
 def load_ml_model():
     try:
-        if not os.path.exists(MODEL_PATH):
-            print(f"Error: Model file not found at {MODEL_PATH}")
-            print(f"Current working directory: {os.getcwd()}")
-            print("Available files in VGG16 directory:")
-            if os.path.exists('VGG16'):
-                print(os.listdir('VGG16'))
-            else:
-                print("VGG16 directory does not exist")
-            return None
-            
         model = load_model(MODEL_PATH)
         print(f"Model loaded successfully from {MODEL_PATH}")
         return model
@@ -35,7 +28,11 @@ def load_ml_model():
         print(f"Error loading model: {str(e)}")
         return None
 
+download_model()
 model = load_ml_model()
+
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Categories matching the model's output classes
 CATEGORIES = ['Healty', 'Yellow Mosaic', 'Sudden Death Syndrome', 'Bacterial Pustule', 'Rust', 'Frogeye Leaf Spot', 'Target Leaf Spot']
