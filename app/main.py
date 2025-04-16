@@ -24,7 +24,15 @@ def load_ml_model():
     try:
         # Set input shape configuration
         tf.keras.backend.set_image_data_format('channels_last')
-        model = load_model(MODEL_PATH, compile=False)
+        
+        # Custom load function to handle version compatibility
+        model = load_model(MODEL_PATH, 
+                         compile=False,
+                         custom_objects=None,
+                         options=tf.saved_model.LoadOptions(
+                             experimental_io_device='/job:localhost'
+                         ))
+        
         print(f"Model loaded successfully from {MODEL_PATH}")
         return model
     except Exception as e:
