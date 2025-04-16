@@ -10,6 +10,7 @@ import os
 import socket
 import sys
 import gdown
+import tensorflow as tf
 
 MODEL_URL = 'https://drive.google.com/file/d/1L51r2z5htdD9z3XSA2DUS987ImtofrnZ/view?usp=drive_link'
 MODEL_PATH = 'model_2_new_dataset.h5'
@@ -21,12 +22,14 @@ def download_model():
 
 def load_ml_model():
     try:
-        model = load_model(MODEL_PATH)
+        # Set input shape configuration
+        tf.keras.backend.set_image_data_format('channels_last')
+        model = load_model(MODEL_PATH, compile=False)
         print(f"Model loaded successfully from {MODEL_PATH}")
         return model
     except Exception as e:
         print(f"Error loading model: {str(e)}")
-        return None
+        sys.exit(1)  # Exit if model can't be loaded as it's critical
 
 download_model()
 model = load_ml_model()
@@ -178,35 +181,5 @@ def test_upload():
         }), 500
 
 if __name__ == '__main__':
-    app.run()
-    # try:
-    #     # Try ports starting from 8000
-    #     port = 8000
-    #     max_port = 9000
-        
-    #     while is_port_in_use(port) and port < max_port:
-    #         print(f"Port {port} is in use, trying next port...")
-    #         port += 1
-        
-    #     if port >= max_port:
-    #         print("Could not find an available port between 8000 and 9000")
-    #         sys.exit(1)
-            
-    #     print(f"\nStarting server on port {port}")
-    #     print(f"Server will be accessible at http://localhost:{port}")
-    #     print("\nTest endpoints:")
-    #     print(f"- Health check: http://localhost:{port}/health")
-    #     print(f"- File upload test: http://localhost:{port}/test-upload")
-    #     print(f"- Prediction: http://localhost:{port}/predict")
-    #     print("\nPostman setup:")
-    #     print("1. Create POST request")
-    #     print("2. URL: http://localhost:{port}/predict")
-    #     print("3. Body: form-data")
-    #     print("4. Key: image (Type: File)")
-    #     print("5. Select your image file")
-        
-    #     app.run(host='0.0.0.0', port=port, debug=False)
-        
-    # except Exception as e:
-    #     print(f"Failed to start server: {str(e)}")
-    #     sys.exit(1)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
