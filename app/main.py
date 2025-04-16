@@ -13,12 +13,14 @@ import gdown
 import tensorflow as tf
 
 MODEL_URL = 'https://drive.google.com/file/d/1L51r2z5htdD9z3XSA2DUS987ImtofrnZ/view?usp=drive_link'
-MODEL_PATH = 'model_2_new_dataset.h5'
+MODEL_PATH = os.path.join('/tmp', 'model_2_new_dataset.h5')
 
 def download_model():
     if not os.path.exists(MODEL_PATH):
         print("Downloading model from Google Drive...")
+        os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
         gdown.download(MODEL_URL, MODEL_PATH, quiet=False, fuzzy=True)
+        print(f"Model downloaded to {MODEL_PATH}")
 
 def load_ml_model():
     try:
@@ -42,8 +44,15 @@ def load_ml_model():
 download_model()
 model = load_ml_model()
 
+# Initialize Flask app with CORS
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Categories matching the model's output classes
 CATEGORIES = ['Healty', 'Yellow Mosaic', 'Sudden Death Syndrome', 'Bacterial Pustule', 'Rust', 'Frogeye Leaf Spot', 'Target Leaf Spot']
@@ -187,6 +196,25 @@ def test_upload():
         return jsonify({
             'error': str(e)
         }), 500
+
+@app.route('/')
+def home():
+    return jsonify({
+        'status': 'online',
+        'endpoints': {
+            '/predict': 'POST - Submit an image for disease detection',
+            '/health': 'GET - Check API health status'
+        }
+    })
+
+# Add error handlers
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({'error': 'Bad request', 'message': str(error)}), 400
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Internal server error', 'message': str(error)}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

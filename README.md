@@ -22,18 +22,42 @@ pip install -r requirements.txt
 python app/main.py
 ```
 
-## Deployment
+## Deployment on Render
 
-This application is configured to be deployed on Render. The deployment process will:
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Use the following settings:
+   - **Environment**: Python 3.9
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app.main:app`
+   - **Plan**: Choose an appropriate plan (at least 512MB RAM recommended)
+
+The deployment will:
 1. Automatically download the model from Google Drive
 2. Install all required dependencies
 3. Start the server using gunicorn
 
 ## API Endpoints
 
-- `POST /predict`: Upload an image to get disease prediction
+- `GET /` - Home endpoint, shows API status and available endpoints
+- `GET /health` - Health check endpoint
+- `POST /predict` - Upload an image to get disease prediction
   - Request: Form data with 'file' field containing the image
-  - Response: JSON with prediction results
+  - Response: JSON with prediction results and confidence scores
+
+## CORS Support
+
+The API supports Cross-Origin Resource Sharing (CORS) and can be accessed from any domain.
+
+## Error Handling
+
+The API includes proper error handling for:
+- 400 Bad Request - Invalid input or missing files
+- 500 Internal Server Error - Server-side issues
+
+## Environment Variables
+
+No additional environment variables are required. The server automatically uses the PORT provided by Render.
 
 ## Android Integration
 
